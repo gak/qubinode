@@ -1,0 +1,9 @@
+# docker-compose file for testing
+
+xt:
+  build: test/docker
+  volumes:
+    - .:/sbnt
+  command: bash -c "/sbin/init --user --verbose & /sbnt/deploy.sh && touch ~/.bitcoin/debug.log && echo tailing... && tail -f ~/.bitcoin/debug.log"
+  #command: bash
+
