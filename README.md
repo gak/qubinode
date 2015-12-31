@@ -1,3 +1,5 @@
+QuBiNoDe - Quick Bitcoin Node Deploy
+
 The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux host, initially aiming for Digital Ocean and Google Cloud.
 
 Core functionality:
@@ -13,7 +15,7 @@ Aiming for:
 
 Ideally it would be running a Python script, then being asked a few questions:
 ```
-# python simple_bitcoin_node_deploy.py
+# python quibinode.py
 
 C: Bitcoin Core
 X: BitcoinXT
@@ -30,5 +32,5 @@ Which provider to install to [D,G]?
 
 or on the host:
 ```
-curl https://github.com/gak/sbnd/deploy.sh | sh
+curl https://github.com/gak/qubinode/deploy.sh | sh
 ```

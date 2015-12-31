@@ -1,9 +1,14 @@
 # docker-compose file for testing
 
-xt:
-  build: test/docker
+upstart:
+  build: docker/upstart
   volumes:
-    - .:/sbnt
-  command: bash -c "/sbin/init --user --verbose & /sbnt/deploy.sh && touch ~/.bitcoin/debug.log && echo tailing... && tail -f ~/.bitcoin/debug.log"
-  #command: bash
+    - .:/qubinode
+  #command: bash -c "/sbin/init --user --verbose & /qubinode/bootstrap.sh && touch ~/.bitcoin/debug.log && echo tailing... && tail -f ~/.bitcoin/debug.log"
+  #command: tail -f /dev/null
+  command: /qubinode/bootstrap.sh
 
+apt:
+  build: docker/apt
+  extends:
+    service: upstart
