@@ -1,36 +1,53 @@
-QuBiNoDe - Quick Bitcoin Node Deploy
+# QuBiNoDe - Quick Bitcoin Node Deploy
 
-The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux host, initially aiming for Digital Ocean and Google Cloud.
+**WARNING** This project is currently under construction! Most things here probably won't work, and the code is probably only useful for developers.
 
-Core functionality:
- * A "One click" installer
+The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux host, initially aiming for Digital Ocean and Google Cloud Platform.
+
+## Features - Initially
+
+ * An almost completely automated installer from Linux or OS X.
  * Ability to enter in an API key so the user doesn't need to log into the box
  * The choice of Bitcoin version and distribution
 
-Aiming for:
+## Features - Near future
 
- * Minimum Linux skills needed, assuming a Windows or OS X user
- * Cross platform including Windows
+ * Ability to run this from Windows, maybe via a simple GUI window
  * A check to see if the port is accessable
 
-Ideally it would be running a Python script, then being asked a few questions:
+## How to use
+
+### Spawn to a new host
+
 ```
-# python quibinode.py
-
-C: Bitcoin Core
-X: BitcoinXT
-U: Bitcoin Unlimited
-Which distribution of Bitcoin would you like deployed [C,X,U] ?
-
-Possible versions: 0.10.1, 0.10.2, 0.11.0.
-Which version would you like to install [Enter for latest] ?
-
-D: Digital Ocean
-G: Google Cloud
-Which provider to install to [D,G]?
+\curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s spawn
 ```
 
-or on the host:
+### On an existing Ubuntu 14.04 Linux host
+
+**NOTE** This assumes an empty system as it sets up a swapfile, etc.
+
 ```
-curl https://github.com/gak/qubinode/deploy.sh | sh
+\curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s install
 ```
+
+## Detailed notes
+
+ * curl downloads a bash script
+ * bash script:
+ ** installs python with build tools (apt based at the moment)
+ ** installs required python libraries
+ ** downloads the python qubinode script and executes with the `spawn` argument
+ * qubinode:
+ ** sets up a new VM
+ ** uploads itself to the VM and executes with the `install` argument
+ * qubinode on the VM:
+ ** creates a 2GB swapfile if one doesn't exist on /swapfile
+ ** downloads the requested version of bitcoin
+ ** verifies hash
+ ** extracts
+ ** installs
+ ** creates upstart file
+ ** creates a bitcoin.conf with 5GB pruning and random rpc creds
+ ** starts the node
+ 

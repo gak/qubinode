@@ -98,6 +98,7 @@ class Provider:
 class DigitalOcean(Provider):
     def setup(self):
         self.ask_token()
+        self.prepare_ssh()
         self.get_regions()
         self.choose_random_region()
         self.create_droplet()
@@ -122,6 +123,12 @@ class DigitalOcean(Provider):
         self.token = raw_input('Enter a generated DigitalOcean access token: ')
         self.manager = functools.partial(do.Manager, token=self.token)
         self.droplet = functools.partial(do.Droplet, token=self.token)
+        self.ssh_do = functools.partial(do.SSHKey, token=self.token)
+
+    def prepare_ssh(self):
+        self.ssh_id = self.ssh_do(name='qubinode', public_key=self.pub_key)
+        if not self.ssh_id.load_by_pub_key(self.pub_key):
+            self.ssh_id.create()
 
     def get_regions(self):
         self.regions = self.manager().get_all_regions()
@@ -135,6 +142,7 @@ class DigitalOcean(Provider):
             region=self.region,
             image='ubuntu-14-04-x64',
             size_slug='512mb',
+            ssh_keys=[self.pub_key],
         )
         self.instance.create()
 
@@ -228,7 +236,9 @@ class Installer:
             return
 
         raise ChecksumException(
-            'Expected {} got {}'.format(
+            '{} from {} expected {} got {}'.format(
+                self.filename,
+                self.target['url'],
                 self.target['sha256'],
                 downloaded_hash,
             )

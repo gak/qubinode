@@ -20,4 +20,5 @@ echo Fetching Python script...
 #fi
 
 echo Running Python script...
-./deploylib.py
+./qubinode.py remote
+
