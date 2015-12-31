@@ -19,6 +19,9 @@ The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux h
 
 ### Spawn to a new host
 
+You will need a Digital Ocean account and have generated a "Personal Access Token" in the "API" section.
+This token can be deleted after the Bitcoin node has been deployed.
+
 ```
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s spawn
 ```
