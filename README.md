@@ -7,8 +7,8 @@ The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux h
 ## Features - Initially
 
  * An almost completely automated installer from Linux or OS X.
- * Ability to enter in an API key so the user doesn't need to log into the box
- * The choice of Bitcoin version and distribution
+ * Ability to enter in an API key so the user doesn't need to create the host or log into the VM.
+ * The choice of Bitcoin version and distribution.
 
 ## Features - Near future
 
