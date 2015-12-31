@@ -12,7 +12,7 @@ cd /sbnt/
 
 echo Installing required Python packages...
 easy_install pip
-pip install requests python-digitalocean pycrypto
+pip install requests python-digitalocean pycrypto docopt
 
 echo Fetching Python script...
 #if [ ! -f deploylib.py ]; then

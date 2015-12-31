@@ -1,5 +1,15 @@
 #!/usr/bin/env python
+'''
+Qubinode - Quick Bitcoin Node Deploy
 
+Usage:
+  qubinode.py spawn
+  qubinode.py local
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+'''
 import os
 import sys
 import glob
@@ -12,8 +22,13 @@ import subprocess
 import textwrap
 
 import requests
+from docopt import docopt
 from Crypto.PublicKey import RSA
 import digitalocean as do
+
+
+__version__ = '0.0.1'
+__commit__ = '$Id$'
 
 
 NAMES = {
@@ -55,6 +70,10 @@ class Config:
     def __init__(self):
         self.priv_key_path = 'key'
         self.pub_key_path = 'key.pub'
+
+    def parse_args(self):
+        self.args = docopt(__doc__, version=__version__)
+        print(self.args)
 
     def ask(self):
         self.ask_version()
@@ -321,6 +340,7 @@ class Installer:
 
 if __name__ == '__main__':
     config = Config()
+    config.parse_args()
     config.ask()
     Installer(config).setup()
 
