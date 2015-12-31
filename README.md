@@ -40,19 +40,19 @@ This token can be deleted after the Bitcoin node has been deployed.
 
  * curl downloads a bash script
  * bash script:
- ** installs python with build tools (apt based at the moment)
- ** installs required python libraries
- ** downloads the python qubinode script and executes with the `spawn` argument
+  * installs python with build tools (apt based at the moment)
+  * installs required python libraries
+  * downloads the python qubinode script and executes with the `spawn` argument
  * qubinode:
- ** sets up a new VM
- ** uploads itself to the VM and executes with the `install` argument
+  * sets up a new VM
+  * uploads itself to the VM and executes with the `install` argument
  * qubinode on the VM:
- ** creates a 2GB swapfile if one doesn't exist on /swapfile
- ** downloads the requested version of bitcoin
- ** verifies hash
- ** extracts
- ** installs
- ** creates upstart file
- ** creates a bitcoin.conf with 5GB pruning and random rpc creds
- ** starts the node
+  * creates a 2GB swapfile if one doesn't exist on /swapfile
+  * downloads the requested version of bitcoin
+  * verifies hash
+  * extracts
+  * installs
+  * creates upstart file
+  * creates a bitcoin.conf with 5GB pruning and random rpc creds
+  * starts the node
  
