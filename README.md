@@ -1,6 +1,6 @@
 # Qubinode
 
-Taken from the words "**Qu**ick **Bi**tcoin **No**de **De**ploy", pronounced qui-bi-node.
+Taken from the words "**Qu**ick **Bi**tcoin **No**de **De**ploy", pronounced qui-bee-node.
 
 **WARNING** This project is currently under construction! Most things here probably won't work, and the code is probably only useful for developers.
 
