@@ -5,6 +5,7 @@ import sys
 import glob
 import shutil
 import string
+import functools
 import random
 import hashlib
 import subprocess
@@ -89,6 +90,10 @@ class Provider:
 
         os.chmod(self.config.priv_key_path, 0600)
 
+    def load_key_pairs(self):
+        self.pub_key = open(self.config.pub_key_path).read()
+        self.priv_key = open(self.config.priv_key_path).read()
+
 
 class DigitalOcean(Provider):
     def setup(self):
@@ -96,6 +101,7 @@ class DigitalOcean(Provider):
         self.get_regions()
         self.choose_random_region()
         self.create_droplet()
+        self.wait_for_droplet()
 
     def ask_token(self):
         print(textwrap.dedent('''
@@ -115,10 +121,37 @@ class DigitalOcean(Provider):
 
         self.token = raw_input('Enter a generated DigitalOcean access token: ')
         self.manager = functools.partial(do.Manager, token=self.token)
+        self.droplet = functools.partial(do.Droplet, token=self.token)
 
     def get_regions(self):
-        print(self.manager().get_all_regions())
-        asdf
+        self.regions = self.manager().get_all_regions()
+
+    def choose_random_region(self):
+        self.region = random.choice(self.regions).slug
+
+    def create_droplet(self):
+        self.instance = self.droplet(
+            name='qubinode',
+            region=self.region,
+            image='ubuntu-14-04-x64',
+            size_slug='512mb',
+        )
+        self.instance.create()
+
+    def wait_for_droplet(self):
+        print('Waiting for Droplet (1-2 minutes)...')
+
+        while True:
+            print('...')
+            actions = self.instance.get_actions()
+            for action in actions:
+                action.load()
+                print(action.status)
+                if action.status == 'completed':
+                    return True
+
+    def ip_address(self):
+        return self.instance.ip_address
 
 
 class Installer:
