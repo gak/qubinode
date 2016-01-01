@@ -3,8 +3,8 @@
 Qubinode - Quick Bitcoin Node Deploy
 
 Usage:
-  qubinode.py spawn (do|digitalocean) [--do-size=<slug>]
-                    [--priv-key-path=<path>] [--pub-key-path=<path>]
+  qubinode.py spawn (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
+                    [options]
   qubinode.py local [--release=<version>] [--prune=<MB>]
                     [--swapfile-size=<MB>] [--swapfile-path=<path>]
   qubinode.py list-versions
@@ -28,7 +28,7 @@ Spawn options:
   --pub-key-path=<path>      [default: ~/.ssh/qubinode.pub]
 
 DigitalOcean options:
-  --do-size=<slug>           Size of the provider's instance [default: 512MB]
+  --do-size=<slug>           Size of the provider's instance [default: 512mb]
 
 '''
 import os
@@ -41,6 +41,8 @@ import random
 import hashlib
 import subprocess
 import textwrap
+import traceback
+import time
 
 import requests
 from docopt import docopt
@@ -54,6 +56,7 @@ __version__ = '0.0.1'
 
 NAMES = {
     'XT': 'BitcoinXT',
+    'BU': 'Bitcoin Unlimited',
 }
 
 
@@ -62,6 +65,12 @@ RELEASES = {
         'url': 'https://github.com/bitcoinxt/bitcoinxt/releases/download/v0.11D/bitcoin-xt-0.11.0-D-linux64.tar.gz',
         'dir': 'bitcoin-xt-0.11.0-D',
         'sha256': 'ba0e8d553271687bc8184a4a7070e5d350171036f13c838db49bb0aabe5c5e49',
+        'install': 'copy_to_root',
+    },
+    'BU/0.11.2': {
+        'url': 'http://www.bitcoinunlimited.info/public/downloads/bitcoinUnlimited-0.11.2-linux64.tar.gz',
+        'dir': 'bitcoinUnlimited-0.11.2',
+        'sha256': 'c6e83e5910d6b4ad852ac6d6a9ec6c92001a5070bb51d4292577174f22495355',
         'install': 'copy_to_root',
     },
 }
@@ -147,9 +156,14 @@ class Config(object):
     def normalise(self):
         self.normalise_path('--priv-key-path')
         self.normalise_path('--pub-key-path')
+        self.normalise_args()
 
-        # Allows attribute access using allow characters, e.g.:
-        # --priv-key-path -> self.config.priv_key_path
+    def normalise_args(self):
+        '''
+        Allows attribute access using allow characters,
+
+        e.g.: --priv-key-path -> self.config.priv_key_path
+        '''
         for k, v in self.args.items():
             self.args[k.replace('--', '').replace('-', '_')] = v
 
@@ -228,7 +242,6 @@ class Provider:
     def run(self):
         print('Executing Qubinode on host...')
         self.channel = self.transport.open_channel('session')
-        #self.channel.get_pty()
         self.channel.exec_command(
                 'bash -c "cd qubinode && bash bootstrap.sh local '
                 '--swapfile-size=2048 --prune=2048"'
@@ -236,29 +249,54 @@ class Provider:
 
         while not self.channel.exit_status_ready():
             while self.channel.recv_ready():
-                data = self.channel.recv(1024)
+                data = self.channel.recv(1024 * 8)
                 sys.stdout.write(data)
             while self.channel.recv_stderr_ready():
-                data = self.channel.recv_stderr(1024)
+                data = self.channel.recv_stderr(1024 * 8)
                 sys.stdout.write(data)
 
         status = self.channel.recv_exit_status()
-        print(status)
+        if status:
+            raise Exception('Error with status code: {}'.format(status))
 
         print('Done!')
 
 
 class DigitalOcean(Provider):
     def setup(self):
-        self.ask_token()
+        self.prepare_token()
         self.prepare_ssh()
         self.get_regions()
         self.choose_random_region()
         self.create_droplet()
-        self.wait_for_droplet()
-        self.connect()
-        self.deploy()
-        self.run()
+        try:
+            self.wait_for_droplet()
+            self.wait_for_ssh()
+            self.connect()
+            self.deploy()
+            self.run()
+        except Exception:
+            traceback.print_exc()
+            print('\n\nThe was an error during the creation process.')
+            destroy = raw_input(
+                '\nWould you like to destroy the vm at {}? '.format(
+                    self.ip_address,
+                )
+            )
+            if destroy and destroy.lower()[0] == 'y':
+                print('Destroying!')
+                self.instance.destroy()
+                print('Done!')
+
+    def prepare_token(self):
+        if self.config.do_token:
+            self.token = self.config.do_token
+        else:
+            self.ask_token()
+
+        self.manager = functools.partial(do.Manager, token=self.token)
+        self.droplet = functools.partial(do.Droplet, token=self.token)
+        self.ssh_do = functools.partial(do.SSHKey, token=self.token)
 
     def ask_token(self):
         print(textwrap.dedent('''
@@ -276,10 +314,7 @@ class DigitalOcean(Provider):
             Press Ctrl-C to abort!
         '''))
 
-        self.token = raw_input('Enter a generated DigitalOcean access token: ')
-        self.manager = functools.partial(do.Manager, token=self.token)
-        self.droplet = functools.partial(do.Droplet, token=self.token)
-        self.ssh_do = functools.partial(do.SSHKey, token=self.token)
+        self.token = raw_input('Enter a DigitalOcean access token: ')
 
     def prepare_ssh(self):
         self.ssh_id = self.ssh_do(name='qubinode', public_key=self.pub_key)
@@ -293,26 +328,40 @@ class DigitalOcean(Provider):
         self.region = random.choice(self.regions).slug
 
     def create_droplet(self):
+        print('Creating droplet: {} {}'.format(
+            self.config.do_size,
+            self.region,
+        ))
         self.instance = self.droplet(
             name='qubinode',
             region=self.region,
             image='ubuntu-14-04-x64',
-            size_slug='512mb',
+            size_slug=self.config.do_size,
             ssh_keys=[self.pub_key],
         )
         self.instance.create()
 
     def wait_for_droplet(self):
-        print('Waiting for Droplet (1-2 minutes)...')
+        print('Waiting for Droplet (few minutes)...')
 
         while True:
-            print('...')
+            time.sleep(1)
+            sys.stdout.write('.')
+            sys.stdout.flush()
             actions = self.instance.get_actions()
             for action in actions:
                 action.load()
-                print(action.status)
                 if action.status == 'completed':
-                    return True
+                    return
+
+    def wait_for_ssh(self):
+        print('\nWaiting a bit for for SSH...')
+        time.sleep(10)
+
+        # This grabs the IP address
+        self.instance.load()
+
+        print(self.instance.networks)
 
     @property
     def ip_address(self):
