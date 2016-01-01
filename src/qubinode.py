@@ -197,7 +197,6 @@ class Provider:
         self.priv_key = open(self.config.priv_key_path).read()
 
     def connect(self):
-	self.ip_address = '188.166.71.64'
 	print('Connecting to {}...'.format(self.ip_address))
 	pkey = paramiko.RSAKey.from_private_key_file(
 	    self.config.priv_key_path
@@ -251,12 +250,12 @@ class Provider:
 
 class DigitalOcean(Provider):
     def setup(self):
-        #self.ask_token()
-        #self.prepare_ssh()
-        #self.get_regions()
-        #self.choose_random_region()
-        #self.create_droplet()
-        #self.wait_for_droplet()
+        self.ask_token()
+        self.prepare_ssh()
+        self.get_regions()
+        self.choose_random_region()
+        self.create_droplet()
+        self.wait_for_droplet()
         self.connect()
         self.deploy()
         self.run()
@@ -315,6 +314,7 @@ class DigitalOcean(Provider):
                 if action.status == 'completed':
                     return True
 
+    @property
     def ip_address(self):
         return self.instance.ip_address
 
