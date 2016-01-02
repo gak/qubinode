@@ -8,6 +8,8 @@ This project is currently under construction! The odds are this won't work for y
 
 It is in currently in development so it will probably change for the better, day by day.
 
+Also please note that the script currently runs bitcoind as root, and will default to a non-privilieged user in near future.
+
 ## Overview
 
 The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux host, initially aiming for Digital Ocean and Google Cloud Platform.
