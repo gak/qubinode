@@ -1,0 +1,12 @@
+requests
+python-digitalocean
+docopt
+pycrypto
+paramiko
+
+# Development Only
+pip
+pip-tools
+fabric
+wheel
+
