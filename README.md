@@ -78,7 +78,7 @@ Fetch the library:
 Now you can run it. Here is an example interactive session:
 
 ```
-root@3444c31d49bf:# python qubinode.py 
+root@3444c31d49bf:~# python qubinode.py 
 Usage:
   qubinode.py spawn (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
                     [options]
@@ -87,7 +87,7 @@ Usage:
   qubinode.py list-versions
   qubinode.py list-providers
 
-root@3444c31d49bf:# python qubinode.py spawn do
+root@3444c31d49bf:~# python qubinode.py spawn do
 
 We will now:
  - Generate or reuse an SSH key pair in *TODO* some directory.
@@ -198,7 +198,7 @@ Starting daemon...
 
 ## Detailed steps
 
- * curl downloads a bash script (one liner)
+ * curl downloads and executes a bash script (one liner)
  * bash script:
   * installs python with build tools (apt based at the moment)
   * installs required python libraries
