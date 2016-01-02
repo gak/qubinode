@@ -2,24 +2,42 @@
 
 Taken from the words "**Qu**ick **Bi**tcoin **No**de **De**ploy", pronounced qui-bee-node.
 
-**WARNING** This project is currently under construction! Most things here probably won't work, and the code is probably only useful for developers.
+## Warning!
+
+This project is currently under construction! The odds are this won't work for you :)
+
+It is in currently in development so it will probably change for the better, day by day.
+
+## Overview
 
 The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux host, initially aiming for Digital Ocean and Google Cloud Platform.
 
-## Features - Initially
+### Features - Working
 
- * An almost completely automated installer from Linux or OS X.
+ * Single liner automated command to deploy to a DigitalOcean host with hardcoded values, i.e. BitcoinXT, 512mb instance, blockchain pruning.
  * Ability to enter in an API key so the user doesn't need to create the host or log into the VM.
- * The choice of Bitcoin version and distribution.
 
-## Features - Near future
+### Features - In progress
+
+ * The choice of Bitcoin version and distribution.
+ * OS X compatibility
+
+### Features - Near future
 
  * Ability to run this from Windows, maybe via a simple GUI window
  * A check to see if the port is accessable
 
-## How to use
+## Usage
 
-### Spawn to a new host
+### Overview
+
+There are different ways of using Qubinode shown in the sections below, ordered by easiest difficulty first.
+
+The core of this is a single python script (qubinode.py) which relies on some dependencies.
+
+There is also a bootstrap shell script which sets up a system (Ubuntu 12.04 only at the moment) system with the correct packages to be able to run the python script.
+
+### One liner to spawn a VM
 
 You will need a Digital Ocean account and have generated a "Personal Access Token" in the "API" section.
 This token can be deleted after the Bitcoin node has been deployed.
