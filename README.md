@@ -38,7 +38,7 @@ This token can be deleted after the Bitcoin node has been deployed.
 
 The core of Qubinode is a single python script (qubinode.py) which relies on some dependencies.
 
-There is also a bootstrap shell script which sets up a system (Ubuntu 12.04 only at the moment) system with the correct packages to be able to run the python script.
+There is also a bootstrap shell script which sets up a system (Ubuntu 14.04 only at the moment) system with the correct packages to be able to run the python script.
 
 ### One liner to spawn a VM
 
