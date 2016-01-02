@@ -87,7 +87,7 @@ Usage:
   qubinode.py list-versions
   qubinode.py list-providers
 
-root@3444c31d49bf:~# python qubinode.py spawn do
+root@3444c31d49bf:~# python qubinode.py spawn digitalocean
 
 We will now:
  - Generate or reuse an SSH key pair in *TODO* some directory.
@@ -117,7 +117,7 @@ Starting daemon...
 Done!
 ```
 
-### Locally install on a linux host
+### Locally install on a Linux host
 
 Similar to above, install the dependencies to allow qubinode.py to run.
 
