@@ -33,14 +33,16 @@ The goal of this project is to easily deploy a Bitcoin node on an Ubuntu Linux h
 
 There are different ways of using Qubinode shown in the sections below, ordered by easiest difficulty first.
 
-The core of this is a single python script (qubinode.py) which relies on some dependencies.
+You will need a DigitalOcean account and have generated a "Personal Access Token" in the "API" section.
+This token can be deleted after the Bitcoin node has been deployed.
+
+The core of Qubinode is a single python script (qubinode.py) which relies on some dependencies.
 
 There is also a bootstrap shell script which sets up a system (Ubuntu 12.04 only at the moment) system with the correct packages to be able to run the python script.
 
 ### One liner to spawn a VM
 
-You will need a DigitalOcean account and have generated a "Personal Access Token" in the "API" section.
-This token can be deleted after the Bitcoin node has been deployed.
+This one liner will probably only work on Ubuntu or Debian based systems. It has only been tested on Ubuntu 14.04.
 
 ```
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s spawn do
@@ -48,13 +50,11 @@ This token can be deleted after the Bitcoin node has been deployed.
 
 ### On an existing Ubuntu 14.04 Linux host
 
-**NOTE** This assumes an empty system as it sets up a swapfile, etc.
-
 ```
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s install
 ```
 
-### On other Linux hosts
+### Install from other Linux hosts
 
 You'll need to install some packages:
 
@@ -72,7 +72,7 @@ pip install requests python-digitalocean pycrypto docopt paramiko
 Fetch the library:
 
 ```
-\curl https://raw.githubusercontent.com/gak/qubinode/develop/src/qubinode.py
+\curl https://raw.githubusercontent.com/gak/qubinode/develop/src/qubinode.py > qubinode.py
 ```
 
 Now you can run it. Here is an example interactive session:
@@ -115,6 +115,85 @@ Creating logrotate configuration...
 Creating bitcoin.conf
 Starting daemon...
 Done!
+```
+
+### Locally install on a linux host
+
+Similar to above, install the dependencies to allow qubinode.py to run.
+
+There are a few options to customise the install:
+
+```
+root@3444c31d49bf:~# python qubinode.py local --help
+Qubinode - Quick Bitcoin Node Deploy
+
+Usage:
+  qubinode.py spawn (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
+                    [options]
+  qubinode.py local [--release=<version>] [--prune=<MB>]
+                    [--swapfile-size=<MB>] [--swapfile-path=<path>]
+  qubinode.py list-versions
+  qubinode.py list-providers
+
+Options:
+  -h --help                  Show this screen.
+  --version                  Show version.
+  -b --batch                 Non-interactive and choose all options by default.
+
+Install options:
+  -s --swapfile=<MB>         Create a swapfile
+  --swapfile-path=<path>     Specify swapfile path [default: /swapfile]
+
+Bitcoin options:
+  -r --release=<version>     Bitcoin node release [default: XT/0.11D]
+  -p --prune=<MB>            Blockchain pruning [default: 2048]
+
+Spawn options:
+  --priv-key-path=<path>     [default: ~/.ssh/qubinode]
+  --pub-key-path=<path>      [default: ~/.ssh/qubinode.pub]
+
+DigitalOcean options:
+  --do-size=<slug>           Size of the provider's instance [default: 512mb]
+```
+
+You can simply run the following to install to your own Linux host:
+
+```
+root@3444c31d49bf:~# python qubinode.py local --prune=2048 --release=BU/0.11.2
+
+Swapfile already set up...
+Checking sha256 of package...
+bitcoinUnlimited-0.11.2/
+bitcoinUnlimited-0.11.2/bin/
+bitcoinUnlimited-0.11.2/bin/bitcoin-cli
+bitcoinUnlimited-0.11.2/bin/bitcoind
+bitcoinUnlimited-0.11.2/bin/bitcoin-qt
+bitcoinUnlimited-0.11.2/bin/bitcoin-tx
+bitcoinUnlimited-0.11.2/bin/test_bitcoin
+bitcoinUnlimited-0.11.2/bin/test_bitcoin-qt
+bitcoinUnlimited-0.11.2/include/
+bitcoinUnlimited-0.11.2/include/bitcoinconsensus.h
+bitcoinUnlimited-0.11.2/lib/
+bitcoinUnlimited-0.11.2/lib/libbitcoinconsensus.so
+bitcoinUnlimited-0.11.2/lib/libbitcoinconsensus.so.0
+bitcoinUnlimited-0.11.2/lib/libbitcoinconsensus.so.0.0.0
+Installing files...
+'bin/bitcoin-qt' -> '/usr/bin/bitcoin-qt'
+'bin/bitcoin-tx' -> '/usr/bin/bitcoin-tx'
+'bin/bitcoin-cli' -> '/usr/bin/bitcoin-cli'
+'bin/test_bitcoin' -> '/usr/bin/test_bitcoin'
+'bin/test_bitcoin-qt' -> '/usr/bin/test_bitcoin-qt'
+'bin/bitcoind' -> '/usr/bin/bitcoind'
+'include/bitcoinconsensus.h' -> '/usr/include/bitcoinconsensus.h'
+'lib/libbitcoinconsensus.so.0.0.0' -> '/usr/lib/libbitcoinconsensus.so.0.0.0'
+removed '/usr/lib/libbitcoinconsensus.so'
+'lib/libbitcoinconsensus.so' -> '/usr/lib/libbitcoinconsensus.so'
+removed '/usr/lib/libbitcoinconsensus.so.0'
+'lib/libbitcoinconsensus.so.0' -> '/usr/lib/libbitcoinconsensus.so.0'
+Creating boot scripts...
+Creating logrotate configuration...
+Creating bitcoin.conf
+Starting daemon...
 ```
 
 ## Detailed steps
