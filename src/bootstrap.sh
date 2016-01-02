@@ -12,9 +12,9 @@ easy_install pip
 pip install requests python-digitalocean pycrypto docopt paramiko
 
 echo Fetching Python script...
-#if [ ! -f deploylib.py ]; then
-#    curl blah > /tmp/ python $@
-#fi
+if [ ! -f qubinode.py ]; then
+    curl https://raw.githubusercontent.com/gak/qubinode/develop/src/qubinode.py > qubinode.py
+fi
 
 echo Running Python script... $@
 python qubinode.py $@
