@@ -48,13 +48,13 @@ This one liner will probably only work on Ubuntu or Debian based systems. It has
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s spawn do
 ```
 
-### On an existing Ubuntu 14.04 Linux host
+### Locally install on an existing Ubuntu 14.04 Linux host
 
 ```
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s install
 ```
 
-### Install from other Linux hosts
+### Spawn a VM from other Linux hosts
 
 You'll need to install some packages:
 
