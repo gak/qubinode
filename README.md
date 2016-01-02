@@ -54,7 +54,7 @@ This one liner will probably only work on Ubuntu or Debian based systems. It has
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/bootstrap.sh | bash -s install
 ```
 
-### Spawn a VM from other Linux hosts
+### Spawn a VM from Linux or OS X without bootstrap script
 
 You'll need to install some packages:
 
@@ -69,7 +69,7 @@ Next, install the python dependencies using either `easy_install` or `pip instal
 pip install requests python-digitalocean pycrypto docopt paramiko
 ```
 
-Fetch the library:
+Fetch the `qubinode.py` Python script:
 
 ```
 \curl https://raw.githubusercontent.com/gak/qubinode/develop/src/qubinode.py > qubinode.py
