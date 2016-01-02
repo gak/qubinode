@@ -170,7 +170,8 @@ class Config(object):
     def ask_version(self):
         #for version, release in VERSIONS.items():
         #    print('{}: {}'.format(version, NAMES[version.split('/')[0]]
-        self.release = 'XT/0.11D'
+        self.release = 'BU/0.11.2'
+        # self.release = 'XT/0.11D'
 
 
 class Provider:
@@ -201,6 +202,7 @@ class Provider:
 
         with open(self.config.priv_key_path, 'w') as f:
             f.write(key.exportKey('PEM'))
+            f.write('\n')
         with open(self.config.pub_key_path, 'w') as f:
             f.write(key.publickey().exportKey('OpenSSH'))
 
@@ -211,6 +213,7 @@ class Provider:
         self.priv_key = open(self.config.priv_key_path).read()
 
     def connect(self):
+        # TODO: Use fabric api for this
 	print('Connecting to {}...'.format(self.ip_address))
 	pkey = paramiko.RSAKey.from_private_key_file(
 	    self.config.priv_key_path
@@ -219,6 +222,7 @@ class Provider:
         self.transport.connect(username='root', pkey=pkey)
 
     def remote_put(self, sftp, filename):
+        # TODO: Use fabric api for this
         try:
             if sftp.lstat(filename):
                 sftp.unlink(filename)
@@ -228,6 +232,7 @@ class Provider:
         sftp.put(filename, os.path.join('qubinode', filename))
 
     def deploy(self):
+        # TODO: Use fabric api for this
         print('Uploading Qubinode...')
         sftp = paramiko.SFTPClient.from_transport(self.transport)
 
@@ -240,6 +245,7 @@ class Provider:
         self.remote_put(sftp, 'qubinode.py')
 
     def run(self):
+        # TODO: Use fabric api for this
         print('Executing Qubinode on host...')
         self.channel = self.transport.open_channel('session')
         self.channel.exec_command(
@@ -275,6 +281,7 @@ class DigitalOcean(Provider):
             self.connect()
             self.deploy()
             self.run()
+            self.show_connection_instructions()
         except Exception:
             traceback.print_exc()
             print('\n\nThe was an error during the creation process.')
@@ -284,9 +291,22 @@ class DigitalOcean(Provider):
                 )
             )
             if destroy and destroy.lower()[0] == 'y':
-                print('Destroying!')
+                self.destroy_with_retry()
+
+    def destroy_with_retry(self):
+        print('Destroying!')
+
+        attempts = 10
+        while attempts:
+            attempts -= 1
+            try:
                 self.instance.destroy()
                 print('Done!')
+            except do.baseapi.DataReadError:
+                traceback.print_exc()
+                print('Something went wrong (still booting?)')
+                print('Retrying with {} attempts left...'.format(attempts))
+                time.sleep(5)
 
     def prepare_token(self):
         if self.config.do_token:
@@ -319,7 +339,9 @@ class DigitalOcean(Provider):
     def prepare_ssh(self):
         self.ssh_id = self.ssh_do(name='qubinode', public_key=self.pub_key)
         if not self.ssh_id.load_by_pub_key(self.pub_key):
+            print('Putting public key into DO account...')
             self.ssh_id.create()
+        print(self.pub_key)
 
     def get_regions(self):
         self.regions = self.manager().get_all_regions()
@@ -342,10 +364,15 @@ class DigitalOcean(Provider):
         self.instance.create()
 
     def wait_for_droplet(self):
-        print('Waiting for Droplet (few minutes)...')
+        print('\nWaiting for Droplet (few minutes)...')
+
+        # This fetches metadata on the VM, including the the IP address.
+        time.sleep(10)
+        self.instance.load()
+        self.show_connection_instructions()
 
         while True:
-            time.sleep(1)
+            time.sleep(2)
             sys.stdout.write('.')
             sys.stdout.flush()
             actions = self.instance.get_actions()
@@ -354,14 +381,16 @@ class DigitalOcean(Provider):
                 if action.status == 'completed':
                     return
 
+    def show_connection_instructions(self):
+        print('IP Address is {}'.format(self.ip_address))
+        print('You can access the VM via this command:')
+        print('\nssh -i {} root@{}\n'.format(
+            self.config.priv_key_path, self.ip_address
+        ))
+
     def wait_for_ssh(self):
         print('\nWaiting a bit for for SSH...')
         time.sleep(10)
-
-        # This grabs the IP address
-        self.instance.load()
-
-        print(self.instance.networks)
 
     @property
     def ip_address(self):
@@ -486,6 +515,8 @@ class Installer:
             '''))
 
     def logrotate(self):
+        # XXX currently not used because upstart is handling printtoconsole
+        # XXX instead of generating a debug.log.
         print('Creating logrotate configuration...')
         with open('/etc/logrotate.d/bitcoin-debug-log', 'w') as f:
             f.write(textwrap.dedent('''

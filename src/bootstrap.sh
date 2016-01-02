@@ -4,7 +4,7 @@
 set -e
 
 echo Installing Dependencies...
-#apt-get update
+apt-get update
 apt-get install -y python-setuptools python-dev gcc
 
 echo Installing required Python packages...
