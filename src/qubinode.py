@@ -140,7 +140,6 @@ class Config(object):
             return object.__getattribute__(self, key)
 
     def __setattr__(self, key, value):
-        print('setting attribute', key, value)
         if key != 'args' and key in self.args:
             self.args[key] = value
         else:
@@ -263,10 +262,21 @@ class Provider:
         # TODO: Use fabric api for this
         print('Executing Qubinode on host...')
         self.channel = self.transport.open_channel('session')
-        self.channel.exec_command(
-                'bash -c "cd qubinode && bash bootstrap.sh local '
-                '--swapfile-size=2048 --prune=2048"'
-            )
+
+        cmd = [
+            'bash -c "cd qubinode && bash bootstrap.sh local',
+            '--release={}'.format(self.config.release),
+        ]
+
+        if self.config.prune:
+            cmd.append('--prune={}'.format(self.config.prune))
+
+        cmd.append('"')
+
+        cmd = ' '.join(cmd)
+        print(cmd)
+
+        self.channel.exec_command(cmd)
 
         while not self.channel.exit_status_ready():
             while self.channel.recv_ready():
