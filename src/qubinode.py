@@ -61,7 +61,7 @@ NAMES = {
 
 
 RELEASES = {
-    'XT/0.11D': {
+    'XT/0.11.0d': {
         'url': 'https://github.com/bitcoinxt/bitcoinxt/releases/download/v0.11D/bitcoin-xt-0.11.0-D-linux64.tar.gz',
         'dir': 'bitcoin-xt-0.11.0-D',
         'sha256': 'ba0e8d553271687bc8184a4a7070e5d350171036f13c838db49bb0aabe5c5e49',
