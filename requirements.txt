@@ -5,16 +5,25 @@
 #    pip-compile requirements.in
 #
 click==6.2                # via pip-tools
+docker-compose==1.5.2
+docker-py==1.6.0          # via docker-compose
+dockerpty==0.3.4          # via docker-compose
 docopt==0.6.2
 ecdsa==0.13               # via paramiko
+enum34==1.1.2             # via docker-compose
 fabric==1.10.2
 first==2.0.1              # via pip-tools
+functools32==3.2.3.post2  # via jsonschema
+jsonschema==2.5.1         # via docker-compose
 paramiko==1.16.0
 pip-tools==1.4.2
 pycrypto==2.6.1
 python-digitalocean==1.8
-requests==2.9.1
-six==1.10.0               # via pip-tools
+pyyaml==3.11
+requests==2.7.0
+six==1.10.0               # via docker-compose, docker-py, dockerpty, pip-tools, websocket-client
+texttable==0.8.4          # via docker-compose
+websocket-client==0.34.0  # via docker-compose, docker-py
 wheel==0.26.0
 
 # The following packages are commented out because they are

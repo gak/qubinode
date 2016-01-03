@@ -3,6 +3,7 @@ python-digitalocean
 docopt
 pycrypto
 paramiko
+pyyaml
 
 # Development Only
 pip
