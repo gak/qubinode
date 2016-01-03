@@ -3,25 +3,25 @@
 Qubinode - Quick Bitcoin Node Deploy
 
 Usage:
-  qubinode.py spawn (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
+  qubinode.py spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
                     [options]
   qubinode.py local [--release=<version>] [--prune=<MB>]
                     [--swapfile-size=<MB>] [--swapfile-path=<path>]
-  qubinode.py list-versions
+  qubinode.py list-releases
   qubinode.py list-providers
 
 Options:
-  -h --help                  Show this screen.
-  --version                  Show version.
-  -b --batch                 Non-interactive and choose all options by default.
+  -h --help                  Show this screen
+  --version                  Show version
+  -b --batch                 Non-interactive and choose all options by default
 
 Install options:
   -s --swapfile=<MB>         Create a swapfile
   --swapfile-path=<path>     Specify swapfile path [default: /swapfile]
 
 Bitcoin options:
-  -r --release=<version>     Bitcoin node release [default: XT/0.11D]
-  -p --prune=<MB>            Blockchain pruning [default: 2048]
+  -r --release=<version>     Bitcoin node release [default: ask]
+  -p --prune=<MB>            Blockchain pruning [default: 5000]
 
 Spawn options:
   --priv-key-path=<path>     [default: ~/.ssh/qubinode]
@@ -54,25 +54,20 @@ import digitalocean as do
 __version__ = '0.0.1'
 
 
+FILE_PATH = os.path.abspath(os.path.dirname(__file__))
+
+
 NAMES = {
-    'XT': 'BitcoinXT',
-    'BU': 'Bitcoin Unlimited',
+    'bc': 'Bitcoin Core',
+    'xt': 'BitcoinXT',
+    'bu': 'Bitcoin Unlimited',
 }
 
 
+# Not sure what to put in here yet... I'm sure there will be something
 RELEASES = {
-    'XT/0.11.0d': {
-        'url': 'https://github.com/bitcoinxt/bitcoinxt/releases/download/v0.11D/bitcoin-xt-0.11.0-D-linux64.tar.gz',
-        'dir': 'bitcoin-xt-0.11.0-D',
-        'sha256': 'ba0e8d553271687bc8184a4a7070e5d350171036f13c838db49bb0aabe5c5e49',
-        'install': 'copy_to_root',
-    },
-    'BU/0.11.2': {
-        'url': 'http://www.bitcoinunlimited.info/public/downloads/bitcoinUnlimited-0.11.2-linux64.tar.gz',
-        'dir': 'bitcoinUnlimited-0.11.2',
-        'sha256': 'c6e83e5910d6b4ad852ac6d6a9ec6c92001a5070bb51d4292577174f22495355',
-        'install': 'copy_to_root',
-    },
+    'xt:0.11.0d': {},
+    'bu:0.11.2': {},
 }
 
 
@@ -84,28 +79,40 @@ PROVIDERS = {
 }
 
 
-class ChecksumException(Exception):
-    pass
-
-
-class ExtractionException(Exception):
-    pass
-
-
-class InstallationException(Exception):
-    pass
-
-
 class Qubinode:
     def run(self):
         self.config = Config()
         self.config.setup()
 
-        if self.config.spawn:
+        if self.config.list_releases:
+            self.list_releases()
+            return
+
+        self.ask_release()
+
+        if self.config.spawn_vm:
             self.boot()
 
         if self.config.local:
-            Installer(self.config).setup()
+            LocalInstaller(self.config).setup()
+
+    def list_releases(self):
+        for release, info in RELEASES.items():
+            print(' - {}'.format(release))
+
+    def ask_release(self):
+        if self.config.release != 'ask':
+            pass
+        elif self.config.batch:
+            self.config.release = 'xt:0.11.0d'
+        else:
+            self.list_releases()
+            self.config.release = raw_input('Which release to install? ')
+
+        if self.config.release not in RELEASES:
+            print('Unknown release: {}'.format(self.config.release))
+            sys.exit(-1)
+
 
     def boot(self):
         '''
@@ -131,6 +138,13 @@ class Config(object):
             return self.args[key]
         else:
             return object.__getattribute__(self, key)
+
+    def __setattr__(self, key, value):
+        print('setting attribute', key, value)
+        if key != 'args' and key in self.args:
+            self.args[key] = value
+        else:
+            return object.__setattr__(self, key, value)
 
     @property
     def provider_key(self):
@@ -222,6 +236,7 @@ class Provider:
         self.transport.connect(username='root', pkey=pkey)
 
     def remote_put(self, sftp, filename):
+        src = os.path.join(FILE_PATH, filename)
         # TODO: Use fabric api for this
         try:
             if sftp.lstat(filename):
@@ -229,7 +244,7 @@ class Provider:
         except IOError:
             pass
 
-        sftp.put(filename, os.path.join('qubinode', filename))
+        sftp.put(src, os.path.join('qubinode', filename))
 
     def deploy(self):
         # TODO: Use fabric api for this
@@ -302,6 +317,7 @@ class DigitalOcean(Provider):
             try:
                 self.instance.destroy()
                 print('Done!')
+                return
             except do.baseapi.DataReadError:
                 traceback.print_exc()
                 print('Something went wrong (still booting?)')
@@ -341,7 +357,6 @@ class DigitalOcean(Provider):
         if not self.ssh_id.load_by_pub_key(self.pub_key):
             print('Putting public key into DO account...')
             self.ssh_id.create()
-        print(self.pub_key)
 
     def get_regions(self):
         self.regions = self.manager().get_all_regions()
@@ -397,33 +412,17 @@ class DigitalOcean(Provider):
         return self.instance.ip_address
 
 
-class Installer:
+class LocalInstaller:
     def __init__(self, config):
         self.config = config
-        self.release = RELEASES[self.config.release]
-        self.filename = self.release['url'].split('/')[-1]
-        self.data_dir = os.path.expanduser('~/.bitcoin')
 
     def setup(self):
         self.swap()
-        self.docker()
-        self.fetch()
-        self.checksum()
-        self.extract()
-        self.install()
-        self.upstart()
-        self.logrotate()
-        self.configure()
-        self.restart()
+        self.docker_install()
+        self.docker_run()
 
     def shell(self, cmd):
         return subprocess.call(cmd, shell=True)
-
-    def random_string(self, length=40):
-        return ''.join([
-            random.choice(string.ascii_letters)
-            for a in xrange(length) 
-        ])
 
     def create_file(self, filename, content):
         open(filename, 'w').write(content)
@@ -446,7 +445,7 @@ class Installer:
 
         open('/etc/fstab', 'a').write('\n/swapfile none swap defaults 0 0\n')
 
-    def docker(self):
+    def docker_install(self):
         self.shell(
             'apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 '
             '--recv-keys 58118E89F3A912897C070ADBF76221572C52609D'
@@ -458,128 +457,16 @@ class Installer:
         self.shell('apt-get update')
         self.shell('apt-get install -y docker-engine')
 
-    def fetch(self):
-        if os.path.exists(self.filename):
-            return
-        url = self.release['url']
-        print('Downloading {}'.format(url))
-        r = requests.get(url, stream=True)
-	with open(self.filename, 'wb') as f:
-	    for chunk in r.iter_content(chunk_size=1024): 
-		if chunk:
-		    f.write(chunk)
-        print('Downloading {} complete...'.format(url))
-
-    def downloaded_hash(self):
-        return hashlib.sha256(open(self.filename, 'rb').read()).hexdigest()
-
-    def checksum(self):
-        print('Checking sha256 of package...')
-        downloaded_hash = self.downloaded_hash()
-        if downloaded_hash == self.release['sha256']:
-            return
-
-        raise ChecksumException(
-            '{} from {} expected {} got {}'.format(
-                self.filename,
-                self.release['url'],
-                self.release['sha256'],
-                downloaded_hash,
-            )
+    def docker_run(self):
+        self.shell(
+            'docker run '
+            '-d '
+            '--restart=always '
+            '--volume=/var/bitcoin:/root/.bitcoin '
+            '--publish=8333:8333 '
+            'qubinode/{}'
+            .format(self.config.release)
         )
-
-    def extract(self):
-        self.shell('tar xvf {}'.format(self.filename))
-
-        if os.path.exists(self.release['dir']):
-            return
-
-        raise ExtractionException('Could not see extracted directory')
-
-    def install(self):
-        '''
-        Dynamically get the method for installing files. e.g. "copy_to_root"
-        would translate to self.copy_to_root().
-        '''
-        print('Installing files...')
-        fun = getattr(self, self.release['install'])
-        fun()
-
-    def upstart(self):
-        '''
-        Create an upstart script so bitcoind can start on boot.
-        '''
-        print('Creating boot scripts...')
-        with open('/etc/init/bitcoind.conf', 'w') as f:
-            f.write(textwrap.dedent('''
-            description "bitcoind"
-
-            start on filesystem
-            stop on runlevel [!2345]
-            respawn
-            respawn limit 10 180
-            kill timeout 60
-
-            script
-            user=root
-            home=/root/.bitcoin
-            cmd=/usr/bin/bitcoind
-            args="-disablewallet -printtoconsole"
-            pidfile=$home/bitcoind.pid
-            exec start-stop-daemon --start --make-pidfile -c $user --chdir $home --pidfile $pidfile --exec $cmd -- $args
-            end script
-            '''))
-
-    def logrotate(self):
-        # XXX currently not used because upstart is handling printtoconsole
-        # XXX instead of generating a debug.log.
-        print('Creating logrotate configuration...')
-        with open('/etc/logrotate.d/bitcoin-debug-log', 'w') as f:
-            f.write(textwrap.dedent('''
-	    /root/.bitcoin/debug.log
-	    {
-		rotate 5
-		copytruncate
-		daily
-		missingok
-		notifempty
-		compress
-		delaycompress
-		sharedscripts
-	    }
-            '''))
-
-    def configure(self):
-        print('Creating bitcoin.conf')
-        if not os.path.exists(self.data_dir):
-            os.mkdir(self.data_dir)
-
-        with open(os.path.join(self.data_dir, 'bitcoin.conf'), 'w') as f:
-            if self.config.prune:
-                f.write('prune={}\n'.format(self.config.prune))
-            f.write('rpcuser={}\n'.format(self.random_string()))
-            f.write('rpcpassword={}\n'.format(self.random_string()))
-
-    def restart(self):
-        print('Starting daemon...')
-        self.shell('stop bitcoind')
-        self.shell('start bitcoind')
-
-    def copy_to_root(self):
-        '''
-        Copies all directories and files from the extracted directory
-        into /usr/.
-        
-        e.g. bitcoind-xt-0.11D/bin/bitcoind -> /usr/bin/bitcoind
-        '''
-        self.shell('cd {} && cp -vr * /usr/'.format(
-            self.release['dir'],
-        ))
-
-        if os.path.exists('/usr/bin/bitcoind'):
-            return
-
-        raise InstallationException('/usr/bin/bitcoind does not exist')
 
 
 if __name__ == '__main__':
