@@ -406,6 +406,7 @@ class Installer:
 
     def setup(self):
         self.swap()
+        self.docker()
         self.fetch()
         self.checksum()
         self.extract()
@@ -424,6 +425,9 @@ class Installer:
             for a in xrange(length) 
         ])
 
+    def create_file(self, filename, content):
+        open(filename, 'w').write(content)
+
     def swap(self, mb=2048):
         '''
         Creates and activates a swapfile, defaulting to 2GB.
@@ -441,6 +445,18 @@ class Installer:
         self.shell('swapon /swapfile')
 
         open('/etc/fstab', 'a').write('\n/swapfile none swap defaults 0 0\n')
+
+    def docker(self):
+        self.shell(
+            'apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 '
+            '--recv-keys 58118E89F3A912897C070ADBF76221572C52609D'
+        )
+        self.create_file(
+            '/etc/apt/sources.list.d/docker.list',
+            'deb https://apt.dockerproject.org/repo ubuntu-trusty main'
+        )
+        self.shell('apt-get update')
+        self.shell('apt-get install -y docker-engine')
 
     def fetch(self):
         if os.path.exists(self.filename):
