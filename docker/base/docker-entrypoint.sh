@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 CONF_DIR=~/.bitcoin
 CONF_FILE=$CONF_DIR/bitcoin.conf
@@ -14,6 +14,12 @@ if [ ! -f $CONF_FILE ]; then
 
     if [ -n $BITCOIN_PRUNE ]; then
         echo "prune=$BITCOIN_PRUNE" >> $CONF_FILE
+    fi
+
+    if [ -n $BITCOIN_BOOTSTRAP ]; then
+        cd $CONF_DIR
+        wget $BITCOIN_BOOTSTRAP -O bootstrap
+        tar xvf bootstrap
     fi
 fi
 
