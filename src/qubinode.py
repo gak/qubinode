@@ -4,7 +4,7 @@ Qubinode - Quick Bitcoin Node Deploy
 
 Usage:
   qubinode.py spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
-                    [options]
+                       [options]
   qubinode.py local [--release=<version>] [--prune=<MB>]
                     [--swapfile-size=<MB>] [--swapfile-path=<path>]
   qubinode.py list-releases
@@ -22,6 +22,7 @@ Install options:
 Bitcoin options:
   -r --release=<version>     Bitcoin node release [default: ask]
   -p --prune=<MB>            Blockchain pruning [default: 5000]
+  -o --bootstrap=<URL>       URL to bootstrap or tarball of blockchain dirs
 
 Spawn options:
   --priv-key-path=<path>     [default: ~/.ssh/qubinode]
@@ -31,31 +32,23 @@ DigitalOcean options:
   --do-size=<slug>           Size of the provider's instance [default: 512mb]
 
 '''
-import os
-import sys
-import glob
-import shutil
-import string
 import functools
+import os
 import random
-import hashlib
 import subprocess
+import sys
 import textwrap
-import traceback
 import time
+import traceback
 
-import requests
-from docopt import docopt
-from Crypto.PublicKey import RSA
-import paramiko
 import digitalocean as do
-
+import paramiko
+from Crypto.PublicKey import RSA
+from docopt import docopt
 
 __version__ = '0.0.1'
 
-
 FILE_PATH = os.path.abspath(os.path.dirname(__file__))
-
 
 NAMES = {
     'bc': 'Bitcoin Core',
@@ -63,13 +56,11 @@ NAMES = {
     'bu': 'Bitcoin Unlimited',
 }
 
-
 # Not sure what to put in here yet... I'm sure there will be something
 RELEASES = {
     'xt:0.11.0d': {},
     'bu:0.11.2': {},
 }
-
 
 PROVIDERS = {
     'do': {
@@ -80,8 +71,10 @@ PROVIDERS = {
 
 
 class Qubinode:
-    def run(self):
+    def __init__(self):
         self.config = Config()
+
+    def run(self):
         self.config.setup()
 
         if self.config.list_releases:
@@ -112,7 +105,6 @@ class Qubinode:
         if self.config.release not in RELEASES:
             print('Unknown release: {}'.format(self.config.release))
             sys.exit(-1)
-
 
     def boot(self):
         '''
@@ -180,17 +172,14 @@ class Config(object):
         for k, v in self.args.items():
             self.args[k.replace('--', '').replace('-', '_')] = v
 
-    def ask_version(self):
-        #for version, release in VERSIONS.items():
-        #    print('{}: {}'.format(version, NAMES[version.split('/')[0]]
-        self.release = 'BU/0.11.2'
-        # self.release = 'XT/0.11D'
-
 
 class Provider:
     def __init__(self, config):
         self.config = config
         self.ensure_key_pairs()
+
+    def ipaddress(self):
+        raise NotImplementedError()
 
     def ensure_key_pairs(self):
         if not os.path.exists(self.config.priv_key_path):
@@ -227,10 +216,10 @@ class Provider:
 
     def connect(self):
         # TODO: Use fabric api for this
-	print('Connecting to {}...'.format(self.ip_address))
-	pkey = paramiko.RSAKey.from_private_key_file(
-	    self.config.priv_key_path
-	)
+        print('Connecting to {}...'.format(self.ip_address))
+        pkey = paramiko.RSAKey.from_private_key_file(
+                self.config.priv_key_path
+        )
         self.transport = paramiko.Transport((self.ip_address, 22))
         self.transport.connect(username='root', pkey=pkey)
 
@@ -311,9 +300,9 @@ class DigitalOcean(Provider):
             traceback.print_exc()
             print('\n\nThe was an error during the creation process.')
             destroy = raw_input(
-                '\nWould you like to destroy the vm at {}? '.format(
-                    self.ip_address,
-                )
+                    '\nWould you like to destroy the vm at {}? '.format(
+                            self.ip_address,
+                    )
             )
             if destroy and destroy.lower()[0] == 'y':
                 self.destroy_with_retry()
@@ -376,15 +365,15 @@ class DigitalOcean(Provider):
 
     def create_droplet(self):
         print('Creating droplet: {} {}'.format(
-            self.config.do_size,
-            self.region,
+                self.config.do_size,
+                self.region,
         ))
         self.instance = self.droplet(
-            name='qubinode',
-            region=self.region,
-            image='ubuntu-14-04-x64',
-            size_slug=self.config.do_size,
-            ssh_keys=[self.pub_key],
+                name='qubinode',
+                region=self.region,
+                image='ubuntu-14-04-x64',
+                size_slug=self.config.do_size,
+                ssh_keys=[self.pub_key],
         )
         self.instance.create()
 
@@ -410,7 +399,7 @@ class DigitalOcean(Provider):
         print('IP Address is {}'.format(self.ip_address))
         print('You can access the VM via this command:')
         print('\nssh -i {} root@{}\n'.format(
-            self.config.priv_key_path, self.ip_address
+                self.config.priv_key_path, self.ip_address
         ))
 
     def wait_for_ssh(self):
@@ -457,28 +446,39 @@ class LocalInstaller:
 
     def docker_install(self):
         self.shell(
-            'apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 '
-            '--recv-keys 58118E89F3A912897C070ADBF76221572C52609D'
+                'apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 '
+                '--recv-keys 58118E89F3A912897C070ADBF76221572C52609D'
         )
         self.create_file(
-            '/etc/apt/sources.list.d/docker.list',
-            'deb https://apt.dockerproject.org/repo ubuntu-trusty main'
+                '/etc/apt/sources.list.d/docker.list',
+                'deb https://apt.dockerproject.org/repo ubuntu-trusty main'
         )
         self.shell('apt-get update')
         self.shell('apt-get install -y docker-engine')
 
     def docker_run(self):
-        self.shell(
-            'docker run '
-            '-d '
-            '--restart=always '
-            '--volume=/var/bitcoin:/root/.bitcoin '
-            '--publish=8333:8333 '
-            'qubinode/{}'
-            .format(self.config.release)
-        )
+        cmd = [
+            'docker run',
+            '--log-driver=json-file',
+            '--log-opts max-size=10k',
+            '--log-opts max-file=10',
+            '-d',
+            '--restart=always',
+            '--volume=/var/bitcoin:/root/.bitcoin',
+            '--publish=8333:8333',
+        ]
+
+        if self.config.prune:
+            cmd.append('-e BITCOIN_PRUNE={}'.format(self.config.prune))
+
+        if self.config.bootstrap:
+            cmd.append('-e BITCOIN_BOOTSTRAP={}'.format(self.config.bootstrap))
+
+        cmd.append('qubinode/{}'.format(self.config.release))
+        cmd = ' '.join(cmd)
+        print('Executing {}'.format(cmd))
+        self.shell(cmd)
 
 
 if __name__ == '__main__':
     Qubinode().run()
-
