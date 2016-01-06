@@ -18,7 +18,7 @@ if [ ! -f $CONF_FILE ]; then
     fi
 
     if [ -n $BITCOIN_BOOTSTRAP ]; then
-        wget $BITCOIN_BOOTSTRAP -O bootstrap
+        curl $BITCOIN_BOOTSTRAP > bootstrap
         tar xvf bootstrap
     fi
 fi

@@ -460,8 +460,8 @@ class LocalInstaller:
         cmd = [
             'docker run',
             '--log-driver=json-file',
-            '--log-opts max-size=10k',
-            '--log-opts max-file=10',
+            '--log-opt="max-size=1m"',
+            '--log-opt="max-file=10"',
             '-d',
             '--restart=always',
             '--volume=/var/bitcoin:/root/.bitcoin',
