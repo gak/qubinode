@@ -5,3 +5,6 @@ base:
 
 xt_0.11.0d:
   build: docker/xt/0.11.0d
+
+bu_0.11.2:
+  build: docker/xt/0.11.2
