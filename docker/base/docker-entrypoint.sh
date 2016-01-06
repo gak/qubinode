@@ -13,11 +13,11 @@ if [ ! -f $CONF_FILE ]; then
     echo "rpcuser=qubinode" >> $CONF_FILE
     echo "rpcpassword=$(dd if=/dev/urandom bs=50 count=1 status=none | base64)" >> $CONF_FILE
 
-    if [ -n $BITCOIN_PRUNE ]; then
+    if [ ! -z "$BITCOIN_PRUNE" ]; then
         echo "prune=$BITCOIN_PRUNE" >> $CONF_FILE
     fi
 
-    if [ -n $BITCOIN_BOOTSTRAP ]; then
+    if [ ! -z "$BITCOIN_BOOTSTRAP" ]; then
         curl $BITCOIN_BOOTSTRAP > bootstrap
         tar xvf bootstrap
     fi
