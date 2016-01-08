@@ -260,6 +260,9 @@ class Provider:
         if self.config.prune:
             cmd.append('--prune={}'.format(self.config.prune))
 
+        if self.config.bootstrap:
+            cmd.append('--bootstrap={}'.format(self.config.bootstrap))
+
         cmd.append('"')
 
         cmd = ' '.join(cmd)
@@ -456,7 +459,7 @@ class LocalInstaller:
         self.shell('apt-get update')
         self.shell('apt-get install -y docker-engine')
 
-    def docker_run(self):
+    def docker_run_cmd(self):
         cmd = [
             'docker run',
             '--log-driver=json-file',
@@ -475,7 +478,10 @@ class LocalInstaller:
             cmd.append('-e BITCOIN_BOOTSTRAP={}'.format(self.config.bootstrap))
 
         cmd.append('qubinode/{}'.format(self.config.release))
-        cmd = ' '.join(cmd)
+        return ' '.join(cmd)
+
+    def docker_run(self):
+        cmd = self.docker_run_cmd()
         print('Executing {}'.format(cmd))
         self.shell(cmd)
 
