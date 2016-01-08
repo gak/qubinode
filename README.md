@@ -1,5 +1,7 @@
 # Qubinode
 
+[![Build Status](https://travis-ci.org/gak/qubinode.svg?branch=develop)](https://travis-ci.org/gak/qubinode)
+
 Taken from the words "**Qu**ick **Bi**tcoin **No**de **De**ploy", pronounced qui-bee-node.
 
 ## Warning!
