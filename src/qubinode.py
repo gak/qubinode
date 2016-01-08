@@ -5,8 +5,7 @@ Qubinode - Quick Bitcoin Node Deploy
 Usage:
   qubinode.py spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
                        [options]
-  qubinode.py local [--release=<version>] [--prune=<MB>]
-                    [--swapfile-size=<MB>] [--swapfile-path=<path>]
+  qubinode.py local [options]
   qubinode.py list-releases
   qubinode.py list-providers
 
