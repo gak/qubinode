@@ -11,9 +11,9 @@ if [ ! -f $CONF_FILE ]; then
     cd $CONF_DIR
 
     if [ ! -z "$BITCOIN_BOOTSTRAP" ]; then
-        echo 'Downloading bootstrap...'
+        echo Downloading bootstrap...
         curl $BITCOIN_BOOTSTRAP > bootstrap
-        echo 'Extracting bootstrap...'
+        echo Extracting bootstrap...
         tar xvf bootstrap
         rm bootstrap
         if [ -f $CONF_FILE ]; then
