@@ -11,3 +11,6 @@ pip-tools
 fabric
 wheel
 docker-compose
+
+# Building for Windows
+pyinstaller
