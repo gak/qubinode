@@ -12,5 +12,10 @@ fabric
 wheel
 docker-compose
 
-# Building for Windows
+# Kivy
+numpy
+Cython
+kivy
+
+# Universal Build
 pyinstaller

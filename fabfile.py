@@ -35,3 +35,5 @@ def releases():
             continue
         yield image.split('_', 1)
 
+def binary():
+    local('pyinstaller --clean --onefile --console src/qubinode.py')

@@ -222,3 +222,11 @@ Starting daemon...
   * creates a bitcoin.conf with 5GB pruning and random RPC creds
   * starts the node
  
+
+# Building
+
+To be able to build a pyinstaller release (at least in Linux that I've seen), ensure that you compile python with the enable-shared option, e.g. via pyenv:
+
+```
+env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 2.7.10
+```

@@ -5,3 +5,6 @@ bitcoin-xt*
 bitcoinUnlimited*
 
 tmp
+build/
+dist/
+

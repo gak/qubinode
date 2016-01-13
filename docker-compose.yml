@@ -1,5 +1,3 @@
-# docker-compose file for testing
-
 base:
   build: docker/base
 
