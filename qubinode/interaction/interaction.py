@@ -1,4 +1,7 @@
 class Interaction(object):
+    def __init__(self, config):
+        self.config = config
+
     def setup(self):
         raise NotImplementedError()
 
@@ -10,4 +13,3 @@ class Interaction(object):
         '''
         fun = globals()[self.config.provider['class']]
         fun(self.config).setup()
-

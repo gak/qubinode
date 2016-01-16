@@ -4,7 +4,7 @@ import sys
 import paramiko
 from Crypto.PublicKey import RSA
 
-from entrypoint import FILE_PATH
+FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 class Provider(object):

@@ -35,11 +35,13 @@ DigitalOcean options:
 '''
 import os
 
+import sys
 from docopt import docopt
 
+from settings.app import __version__
 from interaction.cli import CommandLineInteraction
 from interaction.gui import GraphicalInteraction
-from src.entrypoint import PROVIDERS, __version__
+from qubinode.settings.providers import PROVIDERS
 
 
 class Config(object):
@@ -72,12 +74,17 @@ class Config(object):
     def provider(self):
         return PROVIDERS[self.provider_key]
 
-    def parse_args(self):
-        self.args = docopt(__doc__, version=__version__)
+    def parse_args(self, argv):
+        self.args = docopt(__doc__, version=__version__, argv=argv)
 
-    def setup(self):
-        self.parse_args()
-        # self.ask()
+    def setup(self, gui=False):
+        argv = sys.argv[1:]
+        if gui:
+            argv.insert(0, 'gui')
+
+        print(argv)
+
+        self.parse_args(argv)
         self.normalise()
 
     def normalise_path(self, key):

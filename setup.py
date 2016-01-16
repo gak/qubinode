@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
         name="qubinode",
@@ -6,10 +6,10 @@ setup(
         packages=['qubinode'],
         entry_points={
             'gui_scripts': [
-                'qubinode-gui = qubinode.qubinode.gui',
+                'qubinode-gui = qubinode.main:gui',
             ],
             'console_scripts': [
-                'qubinode = qubinode.qubinode.console',
+                'qubinode = qubinode.main:console',
             ]
         }
 )
