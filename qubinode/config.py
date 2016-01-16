@@ -34,14 +34,14 @@ DigitalOcean options:
 
 '''
 import os
-
 import sys
+
 from docopt import docopt
 
-from settings.app import __version__
 from interaction.cli import CommandLineInteraction
 from interaction.gui import GraphicalInteraction
 from qubinode.settings.providers import PROVIDERS
+from settings.app import __version__
 
 
 class Config(object):

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 from config import Config
 
 
@@ -13,3 +16,7 @@ class Qubinode:
 
 def gui():
     Qubinode().run(gui=True)
+
+
+if __name__ == '__main__':
+    Qubinode().run()
