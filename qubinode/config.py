@@ -2,7 +2,7 @@
 Qubinode - Quick Bitcoin Node Deploy
 
 Usage:
-  qubinode
+  qubinode gui
   qubinode spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
                        [options]
   qubinode local [options]
@@ -37,6 +37,8 @@ import os
 
 from docopt import docopt
 
+from interaction.cli import CommandLineInteraction
+from interaction.gui import GraphicalInteraction
 from src.entrypoint import PROVIDERS, __version__
 
 
@@ -98,4 +100,6 @@ class Config(object):
 
     def get_interaction(self):
         if self.gui:
-            return Gui()
+            return GraphicalInteraction(self)
+        else:
+            return CommandLineInteraction(self)

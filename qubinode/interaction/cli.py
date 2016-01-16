@@ -1,18 +1,12 @@
 import sys
 
-from src.config import Config
-from src.local_installer import LocalInstaller
-from src.settings.bitcoin import RELEASES
+from interaction.interaction import Interaction
+from local_installer import LocalInstaller
+from settings.bitcoin import RELEASES
 
 
-class Qubinode:
-    def __init__(self):
-        self.config = Config()
-        self.interaction = self.config.interaction
-
+class CommandLineInteraction(Interaction):
     def run(self):
-        self.config.setup()
-
         if self.config.list_releases:
             self.list_releases()
             return
@@ -41,12 +35,3 @@ class Qubinode:
         if self.config.release not in RELEASES:
             print('Unknown release: {}'.format(self.config.release))
             sys.exit(-1)
-
-    def boot(self):
-        '''
-        Run the provider class that will start the VM.
-
-        e.g. the "do" provider will instantiate the DigitalOcean class.
-        '''
-        fun = globals()[self.config.provider['class']]
-        fun(self.config).setup()
