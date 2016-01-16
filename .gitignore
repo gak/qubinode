@@ -1,10 +1,8 @@
 key
 key.pub
 
-bitcoin-xt*
-bitcoinUnlimited*
-
 tmp
 build/
 dist/
+qubinode.egg-info/
 

@@ -5,6 +5,11 @@ setup(
         version="0.0.1",
         packages=find_packages(),
         entry_points={
-            'qubinode-gui': 'qubinode:gui'
+            'gui_scripts': [
+                'qubinode-gui = qubinode.gui',
+            ],
+            'console_scripts': [
+                'qubinode = qubinode.console',
+            ]
         }
 )
