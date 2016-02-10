@@ -1,0 +1,14 @@
+variants:
+  bc:
+    title: Bitcoin Classic
+    releases:
+      0.11.0d: {}
+  bu:
+    title: Bitcoin Unlimited
+  co:
+    logo: test.png
+    releases:
+      0.11.0d: {}
+    title: Bitcoin Core
+  xt:
+    title: BitcoinXT

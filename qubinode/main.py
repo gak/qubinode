@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import yaml
 
 from config import Config
 
@@ -16,6 +16,10 @@ class Qubinode:
 
 def gui():
     Qubinode().run(gui=True)
+
+
+def console():
+    Qubinode().run(gui=False)
 
 
 if __name__ == '__main__':

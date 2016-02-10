@@ -4,7 +4,7 @@ Qubinode - Quick Bitcoin Node Deploy
 Usage:
   qubinode gui
   qubinode spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
-                       [options]
+                    [options]
   qubinode local [options]
   qubinode list-releases
   qubinode list-providers
@@ -36,6 +36,7 @@ DigitalOcean options:
 import os
 import sys
 
+import yaml
 from docopt import docopt
 
 from interaction.cli import CommandLineInteraction
@@ -47,6 +48,7 @@ from settings.app import __version__
 class Config(object):
     def __init__(self):
         self.args = {}
+        self.settings = None
 
     def __getattribute__(self, key):
         '''
@@ -82,9 +84,8 @@ class Config(object):
         if gui:
             argv.insert(0, 'gui')
 
-        print(argv)
-
         self.parse_args(argv)
+        self.settings = yaml.load(open('settings.yaml'))
         self.normalise()
 
     def normalise_path(self, key):
@@ -98,7 +99,7 @@ class Config(object):
 
     def normalise_args(self):
         '''
-        Allows attribute access using allow characters,
+        Allows attribute access using underscore characters,
 
         e.g.: --priv-key-path -> self.config.priv_key_path
         '''

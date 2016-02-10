@@ -1,6 +1,7 @@
 class Interaction(object):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, cfg):
+        self.cfg = cfg
+        print('setting local cfg', self.cfg)
 
     def setup(self):
         raise NotImplementedError()
@@ -11,5 +12,5 @@ class Interaction(object):
 
         e.g. the "do" provider will instantiate the DigitalOcean class.
         '''
-        fun = globals()[self.config.provider['class']]
-        fun(self.config).setup()
+        fun = globals()[self.cfg.provider['class']]
+        fun(self.cfg).setup()

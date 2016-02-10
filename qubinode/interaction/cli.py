@@ -2,7 +2,6 @@ import sys
 
 from interaction import Interaction
 from ..local_installer import LocalInstaller
-from ..settings.bitcoin import RELEASES
 
 
 class CommandLineInteraction(Interaction):
