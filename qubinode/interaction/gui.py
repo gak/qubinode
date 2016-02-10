@@ -1,8 +1,8 @@
 from kivy.app import App
-from kivy.uix.label import Label
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 
 from interaction import Interaction
 from qubinode.settings import app
@@ -25,6 +25,7 @@ class SelectVariantBox(BoxLayout):
     def __init__(self, variant, **kwargs):
         super(SelectVariantBox, self).__init__(**kwargs)
 
+        self.variant = variant
         self.size_hint_y = None
         self.height = 150
 
@@ -36,15 +37,16 @@ class SelectVariantBox(BoxLayout):
         details = BoxLayout()
         details.size_hint_x = 2
         details.orientation = 'vertical'
-        details.add_widget(Label(text='Bitcoin Unlimited', font_size='32sp'))
+        details.add_widget(Label(text=self.variant['title'], font_size='32sp'))
         details.add_widget(Label(
                 text_size=(500, None),
-                text='sup',
+                text=self.variant.get('description', ''),
         ))
         self.add_widget(details)
 
     def add_logo(self):
-        image = Image(source='images/test.png')
+        source = self.variant.get('logo', 'test.png')
+        image = Image(source='images/{}'.format(source))
         image.size_hint_x = None
         image.width = 150
         self.add_widget(image)
