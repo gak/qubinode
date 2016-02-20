@@ -14,3 +14,7 @@ class Interaction(object):
         '''
         fun = globals()[self.cfg.provider['class']]
         fun(self.cfg).setup()
+
+    @property
+    def releases(self):
+        return self.cfg.settings['variants']

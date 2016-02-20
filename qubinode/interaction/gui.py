@@ -33,6 +33,12 @@ class SelectVariantBox(BoxLayout):
         self.add_logo()
         self.add_description()
 
+    def on_touch_up(self, touch):
+        if not self.collide_point(touch.x, touch.y):
+            return super(SelectVariantBox, self).on_touch_up(touch)
+
+        print(touch, self.variant)
+
     def add_description(self):
         details = BoxLayout()
         details.size_hint_x = 2
@@ -68,5 +74,5 @@ class SelectVariantLayout(BoxLayout):
         self.cfg = cfg
         self.padding = 10
         self.orientation = 'vertical'
-        for code, variant in self.cfg.settings['variants'].iteritems():
+        for code, variant in self.releases.iteritems():
             self.add_widget(SelectVariantBox(variant))

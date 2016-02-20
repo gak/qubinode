@@ -5,32 +5,35 @@ from ..local_installer import LocalInstaller
 
 
 class CommandLineInteraction(Interaction):
+    def setup(self):
+        print('setup in cli')
+
     def run(self):
-        if self.config.list_releases:
+        if self.cfg.list_releases:
             self.list_releases()
             return
 
         self.ask_release()
 
-        if self.config.spawn_vm:
+        if self.cfg.spawn_vm:
             self.boot()
 
-        if self.config.local:
-            LocalInstaller(self.config).setup()
+        if self.cfg.local:
+            LocalInstaller(self.cfg).setup()
 
     def list_releases(self):
-        for release, info in RELEASES.items():
-            print(' - {}'.format(release))
+        for code, variant in self.releases.iteritems():
+            print(' - ({}) {}'.format(code, variant['title']))
 
     def ask_release(self):
-        if self.config.release != 'ask':
+        if self.cfg.release != 'ask':
             pass
-        elif self.config.batch:
-            self.config.release = 'xt:0.11.0d'
+        elif self.cfg.batch:
+            self.cfg.release = 'xt:0.11.0d'
         else:
             self.list_releases()
-            self.config.release = raw_input('Which release to install? ')
+            self.cfg.release = raw_input('Which release to install? ')
 
-        if self.config.release not in RELEASES:
-            print('Unknown release: {}'.format(self.config.release))
+        if self.cfg.release not in self.releases:
+            print('Unknown release: {}'.format(self.cfg.release))
             sys.exit(-1)
