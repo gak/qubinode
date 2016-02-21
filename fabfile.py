@@ -35,5 +35,30 @@ def releases():
             continue
         yield image.split('_', 1)
 
+
 def binary():
     local('pyinstaller --clean --onefile --console src/qubinode.py')
+
+
+def generate_quick_test_docker():
+    '''
+    This creates a base docker image including the bootstrap.sh commands
+    so it doesn't have to apt-get/pip/etc, every test.
+    '''
+    dockerfile = open('docker/test/quick/Dockerfile', 'w')
+    dockerfile.write('# This was generated using generate_quick_test_docker\n')
+    dockerfile.write('FROM ubuntu:14.04\n')
+
+    for line in open('qubinode/bootstrap.sh'):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('#'):
+            continue
+        if line.startswith('set '):
+            continue
+        if line.startswith('qubinode'):
+            continue
+        if line.startswith('echo'):
+            continue
+        dockerfile.write('RUN {}\n'.format(line))

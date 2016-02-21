@@ -1,6 +1,6 @@
 import sys
 
-from interaction import Interaction
+from .interaction import Interaction
 from ..local_installer import LocalInstaller
 
 

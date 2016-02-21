@@ -7,7 +7,7 @@ import traceback
 
 import digitalocean as do
 
-from provider.provider import Provider
+from .provider import Provider
 
 
 class DigitalOcean(Provider):

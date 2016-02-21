@@ -1,1 +1,1 @@
-from settings.app import *
+from .settings.app import *

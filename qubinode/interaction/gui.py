@@ -1,11 +1,16 @@
-from kivy.app import App
-from kivy.graphics import Color, Rectangle
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.image import Image
-from kivy.uix.label import Label
+import warnings
 
-from interaction import Interaction
-from qubinode.settings import app
+try:
+    from kivy.app import App
+    from kivy.graphics import Color, Rectangle
+    from kivy.uix.boxlayout import BoxLayout
+    from kivy.uix.image import Image
+    from kivy.uix.label import Label
+except ImportError:
+    warnings.warn('Kivy not installed. GUI disabled.')
+
+from .interaction import Interaction
+from ..settings import app
 
 
 class GraphicalInteraction(Interaction, App):

@@ -12,8 +12,8 @@ class Provider(object):
         self.config = config
         self.ensure_key_pairs()
 
-    def ipaddress(self):
-        raise NotImplementedError()
+    def ip_address(self):
+        raise NotImplementedError
 
     def ensure_key_pairs(self):
         if not os.path.exists(self.config.priv_key_path):
@@ -58,7 +58,7 @@ class Provider(object):
         self.transport.connect(username='root', pkey=pkey)
 
     def remote_put(self, sftp, filename):
-        src = os.path.join(FILE_PATH, filename)
+        src = os.path.join(self.config.base_dir, filename)
         # TODO: Use fabric api for this
         try:
             if sftp.lstat(filename):

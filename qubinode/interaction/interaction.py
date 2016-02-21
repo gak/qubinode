@@ -1,3 +1,7 @@
+# noinspection PyUnresolvedReferences
+from ..provider import *  # noqa
+
+
 class Interaction(object):
     def __init__(self, cfg):
         self.cfg = cfg

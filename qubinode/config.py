@@ -39,10 +39,10 @@ import sys
 import yaml
 from docopt import docopt
 
-from interaction.cli import CommandLineInteraction
-from interaction.gui import GraphicalInteraction
-from qubinode.settings.providers import PROVIDERS
-from settings.app import __version__
+from .interaction.cli import CommandLineInteraction
+from .interaction.gui import GraphicalInteraction
+from .settings.providers import PROVIDERS
+from .settings.app import __version__
 
 
 class Config(object):

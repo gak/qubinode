@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import yaml
+import os
 
-from config import Config
+from .config import Config
 
 
 class Qubinode:
@@ -10,6 +10,8 @@ class Qubinode:
 
     def run(self, **kwargs):
         self.config.setup(**kwargs)
+        self.config.root_dir = os.path.abspath(os.path.dirname(__file__))
+        print(self.config.root_dir)
         ui = self.config.get_interaction()
         ui.run()
 
