@@ -10,7 +10,7 @@ import digitalocean as do
 from .provider import Provider
 
 
-class DigitalOcean(Provider):
+class DigitalOceanProvider(Provider):
     def setup(self):
         self.prepare_token()
         self.prepare_ssh()
@@ -20,10 +20,7 @@ class DigitalOcean(Provider):
         try:
             self.wait_for_droplet()
             self.wait_for_ssh()
-            self.connect()
             self.deploy()
-            self.run()
-            self.show_connection_instructions()
         except Exception:
             traceback.print_exc()
             print('\n\nThe was an error during the creation process.')
@@ -122,13 +119,6 @@ class DigitalOcean(Provider):
                 action.load()
                 if action.status == 'completed':
                     return
-
-    def show_connection_instructions(self):
-        print('IP Address is {}'.format(self.ip_address))
-        print('You can access the VM via this command:')
-        print('\nssh -i {} root@{}\n'.format(
-                self.config.priv_key_path, self.ip_address
-        ))
 
     def wait_for_ssh(self):
         print('\nWaiting a bit for for SSH...')

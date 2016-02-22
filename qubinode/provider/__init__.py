@@ -1,1 +1,1 @@
-from .do import DigitalOcean
+from .do import DigitalOceanProvider

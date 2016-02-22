@@ -1,8 +1,9 @@
 import os
-import sys
 
-import paramiko
 from Crypto.PublicKey import RSA
+from fabric.context_managers import settings
+from fabric.contrib.project import rsync_project
+from fabric.operations import run, put
 
 FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -48,44 +49,26 @@ class Provider(object):
         self.pub_key = open(self.config.pub_key_path).read()
         self.priv_key = open(self.config.priv_key_path).read()
 
-    def connect(self):
-        # TODO: Use fabric api for this
-        print('Connecting to {}...'.format(self.ip_address))
-        pkey = paramiko.RSAKey.from_private_key_file(
-                self.config.priv_key_path
-        )
-        self.transport = paramiko.Transport((self.ip_address, 22))
-        self.transport.connect(username='root', pkey=pkey)
-
-    def remote_put(self, sftp, filename):
-        src = os.path.join(self.config.base_dir, filename)
-        # TODO: Use fabric api for this
-        try:
-            if sftp.lstat(filename):
-                sftp.unlink(filename)
-        except IOError:
-            pass
-
-        sftp.put(src, os.path.join('qubinode', filename))
+    def with_env(self):
+        return {
+            'host_string': self.ip_address(),
+            'disable_known_hosts': True,
+            'key': self.config.priv_key_path,
+        }
 
     def deploy(self):
-        # TODO: Use fabric api for this
+        self.upload()
+        self.run()
+        self.show_connection_instructions()
+
+    def upload(self):
         print('Uploading Qubinode...')
-        sftp = paramiko.SFTPClient.from_transport(self.transport)
-
-        try:
-            sftp.lstat('qubinode')
-        except IOError:
-            sftp.mkdir('qubinode')
-
-        self.remote_put(sftp, 'bootstrap.sh')
-        self.remote_put(sftp, 'qubinode.py')
+        with settings(**self.get_env()):
+            put(os.path.join(self.config.base_dir, 'bootstrap.sh'))
+            rsync_project('qubinode', self.config.base_dir)
 
     def run(self):
-        # TODO: Use fabric api for this
         print('Executing Qubinode on host...')
-        self.channel = self.transport.open_channel('session')
-
         cmd = [
             'bash -c "cd qubinode && bash bootstrap.sh local',
             '--release={}'.format(self.config.release),
@@ -102,18 +85,15 @@ class Provider(object):
         cmd = ' '.join(cmd)
         print(cmd)
 
-        self.channel.exec_command(cmd)
-
-        while not self.channel.exit_status_ready():
-            while self.channel.recv_ready():
-                data = self.channel.recv(1024 * 8)
-                sys.stdout.write(data)
-            while self.channel.recv_stderr_ready():
-                data = self.channel.recv_stderr(1024 * 8)
-                sys.stdout.write(data)
-
-        status = self.channel.recv_exit_status()
-        if status:
-            raise Exception('Error with status code: {}'.format(status))
+        with settings(**self.get_env()):
+            run(cmd)
 
         print('Done!')
+
+    def show_connection_instructions(self):
+        print('Host Address is {}'.format(self.ip_address))
+        print('You can access the VM via this command:')
+        print('\nssh -i {} root@{}\n'.format(
+                self.config.priv_key_path, self.ip_address
+        ))
+

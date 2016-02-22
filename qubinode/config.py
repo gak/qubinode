@@ -25,12 +25,16 @@ Bitcoin options:
   -p --prune=<MB>            Blockchain pruning [default: 5000]
   -o --bootstrap=<URL>       URL to bootstrap or tarball of blockchain dirs
 
-Spawn options:
+SSH options:
+  --default-keys             Normal SSH configuration for keys [default: False]
   --priv-key-path=<path>     [default: ~/.ssh/qubinode]
   --pub-key-path=<path>      [default: ~/.ssh/qubinode.pub]
 
 DigitalOcean options:
   --do-size=<slug>           Size of the provider's instance [default: 512mb]
+
+Generic Host options
+  --generic-host=<address>   Hostname or IP address of generic host
 
 '''
 import os
