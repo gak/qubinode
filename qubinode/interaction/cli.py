@@ -1,5 +1,6 @@
 import sys
 
+from qubinode.provider.generic import GenericProvider
 from .interaction import Interaction
 from ..local_installer import LocalInstaller
 
@@ -18,8 +19,14 @@ class CommandLineInteraction(Interaction):
         if self.cfg.spawn_vm:
             self.boot()
 
-        if self.cfg.local:
+        elif self.cfg.local:
             LocalInstaller(self.cfg).setup()
+
+        elif self.cfg.deploy:
+            GenericProvider(self.cfg).setup()
+
+        else:
+            print('Unknown command!')
 
     def list_releases(self):
         for code, variant in self.releases.iteritems():

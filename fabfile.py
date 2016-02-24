@@ -12,6 +12,10 @@ def test():
     local('ls -la')
 
 
+def test_integration():
+    local('docker-compose up -d quick')
+
+
 def build():
     local('docker-compose build base')
     local('docker-compose build')

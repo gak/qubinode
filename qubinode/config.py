@@ -5,6 +5,7 @@ Usage:
   qubinode gui
   qubinode spawn-vm (do|digitalocean) [--do-size=<slug>] [--do-token=<token>]
                     [options]
+  qubinode deploy --address=<address [options]
   qubinode local [options]
   qubinode list-releases
   qubinode list-providers
@@ -25,16 +26,15 @@ Bitcoin options:
   -p --prune=<MB>            Blockchain pruning [default: 5000]
   -o --bootstrap=<URL>       URL to bootstrap or tarball of blockchain dirs
 
-SSH options:
+Host options:
+  --address=<address>        Address of host
   --default-keys             Normal SSH configuration for keys [default: False]
   --priv-key-path=<path>     [default: ~/.ssh/qubinode]
   --pub-key-path=<path>      [default: ~/.ssh/qubinode.pub]
 
 DigitalOcean options:
+  --do-token=<token>         Digital Ocean API token
   --do-size=<slug>           Size of the provider's instance [default: 512mb]
-
-Generic Host options
-  --generic-host=<address>   Hostname or IP address of generic host
 
 '''
 import os

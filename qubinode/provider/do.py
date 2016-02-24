@@ -26,7 +26,7 @@ class DigitalOceanProvider(Provider):
             print('\n\nThe was an error during the creation process.')
             destroy = raw_input(
                     '\nWould you like to destroy the vm at {}? '.format(
-                            self.ip_address,
+                            self.ip_address(),
                     )
             )
             if destroy and destroy.lower()[0] == 'y':
@@ -124,6 +124,5 @@ class DigitalOceanProvider(Provider):
         print('\nWaiting a bit for for SSH...')
         time.sleep(10)
 
-    @property
     def ip_address(self):
         return self.instance.ip_address

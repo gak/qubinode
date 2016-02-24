@@ -10,5 +10,9 @@ bu_0.11.2:
 cl_0.11.2:
   build: docker/cl/0.11.2
 
-quick:
+test_quick:
   build: docker/test/quick
+
+test_integration:
+  build: docker/test/integration
+

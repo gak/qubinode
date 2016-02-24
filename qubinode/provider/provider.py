@@ -63,7 +63,7 @@ class Provider(object):
 
     def upload(self):
         print('Uploading Qubinode...')
-        with settings(**self.get_env()):
+        with settings(**self.with_env()):
             put(os.path.join(self.config.base_dir, 'bootstrap.sh'))
             rsync_project('qubinode', self.config.base_dir)
 
@@ -85,15 +85,15 @@ class Provider(object):
         cmd = ' '.join(cmd)
         print(cmd)
 
-        with settings(**self.get_env()):
+        with settings(**self.with_env()):
             run(cmd)
 
         print('Done!')
 
     def show_connection_instructions(self):
-        print('Host Address is {}'.format(self.ip_address))
+        print('Host Address is {}'.format(self.ip_address()))
         print('You can access the VM via this command:')
         print('\nssh -i {} root@{}\n'.format(
-                self.config.priv_key_path, self.ip_address
+                self.config.priv_key_path, self.ip_address()
         ))
 
