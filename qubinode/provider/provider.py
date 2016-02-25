@@ -64,8 +64,8 @@ class Provider(object):
     def upload(self):
         print('Uploading Qubinode...')
         with settings(**self.with_env()):
-            put(os.path.join(self.config.base_dir, 'bootstrap.sh'))
-            rsync_project('qubinode', self.config.base_dir)
+            put(os.path.join(self.config.root_dir, 'bootstrap.sh'))
+            rsync_project('qubinode', self.config.root_dir)
 
     def run(self):
         print('Executing Qubinode on host...')

@@ -43,8 +43,6 @@ import sys
 import yaml
 from docopt import docopt
 
-from .interaction.cli import CommandLineInteraction
-from .interaction.gui import GraphicalInteraction
 from .settings.providers import PROVIDERS
 from .settings.app import __version__
 
@@ -112,6 +110,8 @@ class Config(object):
 
     def get_interaction(self):
         if self.gui:
+            from .interaction.gui import GraphicalInteraction
             return GraphicalInteraction(self)
         else:
+            from .interaction.cli import CommandLineInteraction
             return CommandLineInteraction(self)

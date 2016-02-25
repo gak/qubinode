@@ -1,5 +1,7 @@
-import yaml
+import json
+import time
 
+import yaml
 from fabric.operations import local
 
 
@@ -13,7 +15,20 @@ def test():
 
 
 def test_integration():
-    local('docker-compose up -d quick')
+    local('docker-compose up -d test_integration')
+    time.sleep(2)
+    data = local(
+            'docker inspect qubinode_test_integration_1',
+            capture=True
+    ).stdout
+    data = json.loads(data)
+    ip_address = data[0]['NetworkSettings']['IPAddress']
+    local(' '.join([
+        'qubinode deploy',
+        '--priv-key=docker/test/base/ssh-keys/test',
+        '--address={}'.format(ip_address),
+        '--release=bc',
+    ]))
 
 
 def build():
@@ -51,7 +66,7 @@ def generate_quick_test_docker():
     '''
     dockerfile = open('docker/test/quick/Dockerfile', 'w')
     dockerfile.write('# This was generated using generate_quick_test_docker\n')
-    dockerfile.write('FROM ubuntu:14.04\n')
+    dockerfile.write('FROM qubinode_test_base\n')
 
     for line in open('qubinode/bootstrap.sh'):
         line = line.strip()
